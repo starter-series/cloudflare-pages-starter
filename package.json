@@ -1,0 +1,30 @@
+{
+  "name": "my-site",
+  "version": "0.1.0",
+  "description": "Static site with Cloudflare Pages CI/CD baked in.",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev src --port 3000",
+    "lint": "eslint src/",
+    "deploy": "wrangler pages deploy src --project-name my-site",
+    "version:patch": "node scripts/bump-version.js patch",
+    "version:minor": "node scripts/bump-version.js minor",
+    "version:major": "node scripts/bump-version.js major"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/YOUR_SITE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.3",
+    "globals": "^17.4.0",
+    "wrangler": "^4.14.0"
+  }
+}

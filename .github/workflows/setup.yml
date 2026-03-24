@@ -1,0 +1,55 @@
+name: Template Setup
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  setup:
+    if: github.run_number == 1
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check if template
+        id: check
+        run: |
+          NAME=$(node -e "console.log(require('./package.json').name)")
+          if [ "$NAME" = "my-site" ]; then
+            echo "is_template=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_template=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create setup checklist
+        if: steps.check.outputs.is_template == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Setup: Configure your Cloudflare Pages site" \
+            --body "$(cat <<'EOF'
+          Welcome! You've created a new project from **cloudflare-pages-starter**. Here's your setup checklist:
+
+          ## Required
+          - [ ] Update `package.json` — change `name` and `description`
+          - [ ] Replace `src/` with your site files (HTML, CSS, JS, images)
+          - [ ] Create a Cloudflare Pages project (see [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md))
+
+          ## Cloudflare Setup
+          - [ ] Create a Cloudflare account at [dash.cloudflare.com](https://dash.cloudflare.com)
+          - [ ] Create an API token with **Cloudflare Pages: Edit** permission
+          - [ ] Add GitHub Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+          - [ ] Create a GitHub Environment named `cloudflare` (Settings → Environments → New)
+          - [ ] Set GitHub variable `PROJECT_NAME` to your Cloudflare Pages project name
+
+          See [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md) for a detailed guide.
+
+          ## Recommended
+          - [ ] Delete this issue when done
+
+          Happy deploying!
+          EOF
+          )"
