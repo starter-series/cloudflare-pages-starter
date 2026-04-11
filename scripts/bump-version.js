@@ -12,7 +12,8 @@ if (!['major', 'minor', 'patch'].includes(level)) {
 const pkgPath = path.resolve(__dirname, '..', 'package.json');
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
-const [major, minor, patch] = pkg.version.split('.').map(Number);
+const previous = pkg.version;
+const [major, minor, patch] = previous.split('.').map(Number);
 const next =
   level === 'major' ? `${major + 1}.0.0` :
   level === 'minor' ? `${major}.${minor + 1}.0` :
@@ -20,4 +21,4 @@ const next =
 
 pkg.version = next;
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
-console.log(`${pkg.version.replace(next, pkg.version.split('.').map(Number).join('.'))} → ${next}`);
+console.log(`${previous} → ${next}`);
