@@ -24,26 +24,21 @@
 
 ## 빠른 시작
 
-> ⚠️ **가장 먼저 할 일: `package.json`의 `name`을 바꾸세요** (`"my-site"` → 실제 프로젝트 이름), 그리고 `repository.url`의 `YOUR_USERNAME/YOUR_SITE`도 교체하세요. `deploy` 스크립트가 `$npm_package_name`을 Cloudflare Pages 프로젝트 이름으로 사용합니다 — **건너뛰면 CD가 엉뚱한 프로젝트에 배포하거나 실패합니다.**
+**[create-starter](https://github.com/starter-series/create-starter) 사용** (추천):
 
 ```bash
-# 1. GitHub에서 "Use this template" 클릭 (또는 clone)
-git clone https://github.com/starter-series/cloudflare-pages-starter.git my-site
-cd my-site
-
-# 2. ⚠️ 필수 — package.json 수정
-#    → "name"을 "my-site"에서 Cloudflare Pages 프로젝트 이름으로 변경
-#    → repository.url의 YOUR_USERNAME/YOUR_SITE 교체
-#    → description 업데이트
-
-# 3. 의존성 설치
-npm install
-
-# 4. 로컬 개발 서버 시작
-npm run dev
-
-# 5. src/를 직접 작성한 사이트 파일로 교체
+npx @starter-series/create my-site --template cloudflare-pages
+cd my-site && npm install && npm run dev
 ```
+
+**또는 직접 clone:**
+
+```bash
+git clone https://github.com/starter-series/cloudflare-pages-starter my-site
+cd my-site && npm install && npm run dev
+```
+
+> ⚠️ **배포 전 필수: `package.json`의 `name`을 바꾸세요** (`"my-site"` → 실제 Cloudflare Pages 프로젝트 이름), 그리고 `repository.url`의 `YOUR_USERNAME/YOUR_SITE`도 교체하세요. `deploy` 스크립트가 `$npm_package_name`을 Cloudflare Pages 프로젝트 이름으로 사용합니다 — **건너뛰면 CD가 엉뚱한 프로젝트에 배포하거나 실패합니다.** (create-starter는 `name`을 자동으로 설정합니다. `repository.url`은 수동 설정이 필요합니다.)
 
 ## 포함된 구성
 
