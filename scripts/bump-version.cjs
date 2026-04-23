@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const level = process.argv[2];
 if (!['major', 'minor', 'patch'].includes(level)) {
-  console.error('Usage: node bump-version.js <major|minor|patch>');
+  console.error('Usage: node bump-version.cjs <major|minor|patch>');
   process.exit(1);
 }
 

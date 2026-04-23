@@ -52,6 +52,11 @@ npm run dev
 │   ├── index.html              # 사이트 진입점 (직접 작성한 사이트로 교체)
 │   ├── style.css               # 스타일
 │   └── main.js                 # JavaScript
+├── functions/
+│   └── api/
+│       └── hello.js            # Pages Function 예시 → GET /api/hello
+├── tests/
+│   └── functions.test.js       # Pages Functions용 node:test 유닛 테스트
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml              # 린트, 보안 스캔
@@ -61,7 +66,7 @@ npm run dev
 ├── docs/
 │   └── CLOUDFLARE_PAGES_SETUP.md  # 배포 설정 가이드
 ├── scripts/
-│   └── bump-version.js         # Semver 버전 범퍼
+│   └── bump-version.cjs        # Semver 버전 범퍼
 ├── eslint.config.js            # ESLint v9 flat config
 ├── .gitignore
 └── package.json
@@ -88,6 +93,7 @@ npm run dev
 | 대용량 파일 체크 | 5 MB 초과 파일 방지 (Cloudflare 제한: 25 MB) |
 | Install | `npm ci` lockfile 검증 |
 | 린트 | ESLint v9 flat config |
+| 테스트 | `node --test`로 Pages Functions 유닛 테스트 실행 |
 
 ### 보안 & 유지보수
 
@@ -159,9 +165,56 @@ npm run version:major   # 0.1.0 → 1.0.0
 # 린트
 npm run lint
 
+# 테스트 실행
+npm test
+
 # 수동 배포
 npm run deploy
 ```
+
+## Pages Functions
+
+API 라우트가 필요하면 `functions/`에 파일만 넣으세요. 설정 없이 자동으로 인식됩니다.
+
+```
+functions/api/hello.js   →   GET /api/hello
+functions/users/[id].js  →   GET /users/:id
+```
+
+이 스타터에는 `functions/api/hello.js`가 포함되어 있고, `src/index.html`에서 호출해 결과를 렌더링합니다. 요청을 받고 `Response`를 돌려주는 게 API의 전부입니다:
+
+```js
+export async function onRequest(context) {
+  const { request } = context;
+  const url = new URL(request.url);
+  const name = url.searchParams.get('name') ?? 'World';
+  return new Response(JSON.stringify({ greeting: `Hello, ${name}!` }), {
+    headers: { 'content-type': 'application/json' },
+  });
+}
+```
+
+**로컬 개발** — `wrangler pages dev`가 에셋 디렉토리 옆에 있는 `functions/`를 자동으로 찾습니다:
+
+```bash
+npm run dev
+# 실행 내용: wrangler pages dev src --port 3000
+# http://localhost:3000 열기 → 페이지가 /api/hello를 호출해 인사말을 렌더링.
+```
+
+Workers 런타임 버전을 고정하고 싶다면 `--compatibility-date`를 넘기세요:
+
+```bash
+npx wrangler pages dev src --compatibility-date=2026-04-24
+```
+
+**테스트** — Pages Functions는 `Request`를 받고 `Response`를 돌려주는 평범한 ES 모듈이라, `node:test`에서 모킹 없이 바로 돌아갑니다:
+
+```bash
+npm test
+```
+
+미들웨어, `[param]` 라우팅, `env` 바인딩 (KV, D1, R2) 등 자세한 내용은 [Cloudflare Pages Functions 문서](https://developers.cloudflare.com/pages/functions/)를 참고하세요.
 
 ## 왜 Cloudflare Pages?
 
