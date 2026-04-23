@@ -1,0 +1,25 @@
+# Wrangler configuration for Cloudflare Pages.
+#
+# `wrangler pages dev` auto-discovers this file. You don't need it for basic
+# static-site deploys, but it's required the moment you add bindings (KV, D1,
+# R2, environment variables, etc.) to Pages Functions.
+#
+# Docs: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+
+name = "my-site"
+compatibility_date = "2026-04-24"
+pages_build_output_dir = "src"
+
+# --- KV binding example (used by functions/api/visits.js) -----------------
+#
+# Create a namespace first:
+#   npx wrangler kv namespace create VISITS
+#   npx wrangler kv namespace create VISITS --preview
+#
+# Then paste the returned IDs below and uncomment the block. Until you do,
+# /api/visits returns 503 and the UI hides the counter.
+#
+# [[kv_namespaces]]
+# binding = "VISITS"
+# id = "<paste-production-namespace-id-here>"
+# preview_id = "<paste-preview-namespace-id-here>"
