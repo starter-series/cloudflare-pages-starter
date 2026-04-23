@@ -9,7 +9,8 @@
     "deploy": "wrangler pages deploy src --project-name $npm_package_name",
     "version:patch": "node scripts/bump-version.js patch",
     "version:minor": "node scripts/bump-version.js minor",
-    "version:major": "node scripts/bump-version.js major"
+    "version:major": "node scripts/bump-version.js major",
+    "postinstall": "node scripts/check-placeholders.js"
   },
   "repository": {
     "type": "git",
