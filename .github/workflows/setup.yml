@@ -13,15 +13,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Check if template
+      - name: Check for placeholder values
         id: check
         run: |
           NAME=$(node -e "console.log(require('./package.json').name)")
+          REPO_URL=$(node -e "console.log((require('./package.json').repository && require('./package.json').repository.url) || '')")
+          HAS_PLACEHOLDER=false
           if [ "$NAME" = "my-site" ]; then
-            echo "is_template=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_template=false" >> "$GITHUB_OUTPUT"
+            HAS_PLACEHOLDER=true
+            echo "placeholder_name=true" >> "$GITHUB_OUTPUT"
           fi
+          if echo "$REPO_URL" | grep -qE 'YOUR_USERNAME|YOUR_SITE'; then
+            HAS_PLACEHOLDER=true
+            echo "placeholder_repo=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "is_template=$HAS_PLACEHOLDER" >> "$GITHUB_OUTPUT"
 
       - name: Create setup checklist
         if: steps.check.outputs.is_template == 'true'
@@ -33,8 +39,12 @@ jobs:
             --body "$(cat <<'EOF'
           Welcome! You've created a new project from **cloudflare-pages-starter**. Here's your setup checklist:
 
+          ## ⚠️ CRITICAL — Do this FIRST
+          - [ ] **Rename `package.json` `name`** (currently `"my-site"`) — the `deploy` script uses `$npm_package_name` as the Cloudflare project name. **CD will fail or deploy to the wrong project if you skip this.**
+          - [ ] **Update `repository.url`** in `package.json` — replace `YOUR_USERNAME/YOUR_SITE` with your actual repo path.
+
           ## Required
-          - [ ] Update `package.json` — change `name` and `description`
+          - [ ] Update `package.json` `description`
           - [ ] Replace `src/` with your site files (HTML, CSS, JS, images)
           - [ ] Create a Cloudflare Pages project (see [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md))
 
