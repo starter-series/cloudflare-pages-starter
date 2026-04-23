@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "description": "Static site with Cloudflare Pages CI/CD baked in.",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "wrangler pages dev src --port 3000",
-    "lint": "eslint src/",
+    "lint": "eslint src/ functions/ tests/",
+    "test": "node --test tests/functions.test.js",
     "deploy": "wrangler pages deploy src --project-name $npm_package_name",
-    "version:patch": "node scripts/bump-version.js patch",
-    "version:minor": "node scripts/bump-version.js minor",
-    "version:major": "node scripts/bump-version.js major",
-    "postinstall": "node scripts/check-placeholders.js"
+    "version:patch": "node scripts/bump-version.cjs patch",
+    "version:minor": "node scripts/bump-version.cjs minor",
+    "version:major": "node scripts/bump-version.cjs major",
+    "postinstall": "node scripts/check-placeholders.cjs"
   },
   "repository": {
     "type": "git",

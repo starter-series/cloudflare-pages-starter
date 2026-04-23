@@ -8,16 +8,20 @@ Static site with Cloudflare Pages deployment and GitHub Actions CI/CD.
 src/
   index.html    → Site entry point
   style.css     → Styles
-  main.js       → JavaScript
+  main.js       → JavaScript (calls /api/hello demo)
+functions/
+  api/hello.js  → Example Pages Function
+tests/
+  functions.test.js → node:test units for Pages Functions
 scripts/
-  bump-version.js → Version bumping
+  bump-version.cjs → Version bumping
 docs/
   CLOUDFLARE_PAGES_SETUP.md → Deployment setup guide
 ```
 
 ## CI/CD Pipeline
 
-- **ci.yml**: Push/PR to main. Gitleaks + large file check + ESLint. No secrets.
+- **ci.yml**: Push/PR to main. Gitleaks + large file check + ESLint + `node --test`. No secrets.
 - **cd.yml**: Manual trigger. CI gate → Wrangler deploy to Cloudflare Pages → GitHub Release.
 - **setup.yml**: First push only. Creates setup checklist Issue.
 

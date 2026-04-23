@@ -52,6 +52,11 @@ npm run dev
 │   ├── index.html              # Site entry point (replace with your site)
 │   ├── style.css               # Styles
 │   └── main.js                 # JavaScript
+├── functions/
+│   └── api/
+│       └── hello.js            # Example Pages Function → GET /api/hello
+├── tests/
+│   └── functions.test.js       # node:test unit tests for Pages Functions
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml              # Lint, security scan
@@ -61,7 +66,7 @@ npm run dev
 ├── docs/
 │   └── CLOUDFLARE_PAGES_SETUP.md  # Deployment setup guide
 ├── scripts/
-│   └── bump-version.js         # Semver version bumper
+│   └── bump-version.cjs        # Semver version bumper
 ├── eslint.config.js            # ESLint v9 flat config
 ├── .gitignore
 └── package.json
@@ -88,6 +93,7 @@ npm run dev
 | Large file check | Prevents files over 5 MB (Cloudflare limit: 25 MB) |
 | Install | `npm ci` with lockfile verification |
 | Lint | ESLint v9 flat config |
+| Test | `node --test` runs Pages Functions unit tests |
 
 ### Security & Maintenance
 
@@ -159,9 +165,56 @@ npm run version:major   # 0.1.0 → 1.0.0
 # Lint
 npm run lint
 
+# Run tests
+npm test
+
 # Deploy manually
 npm run deploy
 ```
+
+## Pages Functions
+
+Need an API route? Add a file to `functions/` — it's picked up automatically, no config.
+
+```
+functions/api/hello.js   →   GET /api/hello
+functions/users/[id].js  →   GET /users/:id
+```
+
+This starter ships with `functions/api/hello.js` wired into `src/index.html` as a demo. Reading the request and returning a `Response` is the whole API:
+
+```js
+export async function onRequest(context) {
+  const { request } = context;
+  const url = new URL(request.url);
+  const name = url.searchParams.get('name') ?? 'World';
+  return new Response(JSON.stringify({ greeting: `Hello, ${name}!` }), {
+    headers: { 'content-type': 'application/json' },
+  });
+}
+```
+
+**Local dev** — `wrangler pages dev` auto-discovers `functions/` next to your assets directory:
+
+```bash
+npm run dev
+# which runs: wrangler pages dev src --port 3000
+# Open http://localhost:3000 — the page calls /api/hello and renders the greeting.
+```
+
+If you want to pin a Workers runtime version, pass `--compatibility-date`:
+
+```bash
+npx wrangler pages dev src --compatibility-date=2026-04-24
+```
+
+**Testing** — Pages Functions are plain ES modules that accept a `Request` and return a `Response`, so `node:test` runs them with zero mocks:
+
+```bash
+npm test
+```
+
+See [Cloudflare Pages Functions docs](https://developers.cloudflare.com/pages/functions/) for middleware, `[param]` routing, `env` bindings (KV, D1, R2), and more.
 
 ## Why Cloudflare Pages?
 
