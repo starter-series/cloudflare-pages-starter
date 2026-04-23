@@ -24,26 +24,21 @@ Build your site. Push to deploy. Free and fast.
 
 ## Quick Start
 
-> ⚠️ **Do this FIRST: rename `package.json` `name`** (from `"my-site"`) and update `repository.url` (replace `YOUR_USERNAME/YOUR_SITE`). The `deploy` script uses `$npm_package_name` as the Cloudflare Pages project name — **CD will silently deploy to the wrong project (or fail) if you skip this.**
+**Via [create-starter](https://github.com/starter-series/create-starter)** (recommended):
 
 ```bash
-# 1. Click "Use this template" on GitHub (or clone)
-git clone https://github.com/starter-series/cloudflare-pages-starter.git my-site
-cd my-site
-
-# 2. ⚠️ REQUIRED — Update package.json
-#    → Change "name" from "my-site" to your Cloudflare Pages project name
-#    → Replace YOUR_USERNAME/YOUR_SITE in repository.url
-#    → Update description
-
-# 3. Install dependencies
-npm install
-
-# 4. Start local dev server
-npm run dev
-
-# 5. Replace src/ with your site files
+npx @starter-series/create my-site --template cloudflare-pages
+cd my-site && npm install && npm run dev
 ```
+
+**Or clone directly:**
+
+```bash
+git clone https://github.com/starter-series/cloudflare-pages-starter my-site
+cd my-site && npm install && npm run dev
+```
+
+> ⚠️ **Before deploying: rename `package.json` `name`** (from `"my-site"` to your Cloudflare Pages project name) and update `repository.url` (replace `YOUR_USERNAME/YOUR_SITE`). The `deploy` script uses `$npm_package_name` as the Cloudflare Pages project name — **CD will silently deploy to the wrong project (or fail) if you skip this.** (create-starter handles the `name` automatically; you still need to set `repository.url`.)
 
 ## What's Included
 
