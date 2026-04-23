@@ -54,9 +54,12 @@ npm run dev
 │   └── main.js                 # JavaScript
 ├── functions/
 │   └── api/
-│       └── hello.js            # Example Pages Function → GET /api/hello
+│       ├── hello.js            # Example Pages Function → GET /api/hello
+│       └── visits.js           # KV-backed visit counter → GET /api/visits
 ├── tests/
-│   └── functions.test.js       # node:test unit tests for Pages Functions
+│   ├── functions.test.js       # node:test unit tests for /api/hello
+│   └── visits.test.js          # Unit tests for /api/visits with mock KV
+├── wrangler.toml               # Pages config + commented KV binding example
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml              # Lint, security scan
@@ -215,6 +218,51 @@ npm test
 ```
 
 See [Cloudflare Pages Functions docs](https://developers.cloudflare.com/pages/functions/) for middleware, `[param]` routing, `env` bindings (KV, D1, R2), and more.
+
+### Pages KV (stateful example)
+
+`functions/api/visits.js` is a tiny visit counter backed by [Cloudflare Workers KV](https://developers.cloudflare.com/kv/). It reads `count` from a KV namespace bound as `VISITS`, increments it, and returns JSON:
+
+```js
+export async function onRequest(context) {
+  const { env } = context;
+  const current = parseInt(await env.VISITS.get('count'), 10) || 0;
+  const next = current + 1;
+  await env.VISITS.put('count', String(next));
+  return new Response(JSON.stringify({ visits: next }), {
+    headers: { 'content-type': 'application/json' },
+  });
+}
+```
+
+**One-time setup** — create a KV namespace (plus a preview one for local dev):
+
+```bash
+npx wrangler kv namespace create VISITS
+npx wrangler kv namespace create VISITS --preview
+```
+
+Each command prints an ID. Open `wrangler.toml`, uncomment the `[[kv_namespaces]]` block, and paste the IDs:
+
+```toml
+[[kv_namespaces]]
+binding = "VISITS"
+id = "<paste-production-namespace-id-here>"
+preview_id = "<paste-preview-namespace-id-here>"
+```
+
+**Local dev** — `wrangler pages dev` uses a local KV simulator by default, so you don't need to touch production data:
+
+```bash
+npm run dev
+# Open http://localhost:3000 — /api/visits increments on each page load.
+```
+
+Until you create the namespace, `/api/visits` returns `503` and the counter element is hidden on the page — `wrangler pages dev` still boots cleanly.
+
+**Deploy** — once the IDs are in `wrangler.toml`, the existing CD workflow deploys the binding automatically (no extra secrets).
+
+See the [KV bindings](https://developers.cloudflare.com/kv/concepts/kv-bindings/) and [Wrangler KV commands](https://developers.cloudflare.com/kv/reference/kv-commands/) docs for the full API.
 
 ## Why Cloudflare Pages?
 

@@ -54,9 +54,12 @@ npm run dev
 │   └── main.js                 # JavaScript
 ├── functions/
 │   └── api/
-│       └── hello.js            # Pages Function 예시 → GET /api/hello
+│       ├── hello.js            # Pages Function 예시 → GET /api/hello
+│       └── visits.js           # KV 기반 방문 카운터 → GET /api/visits
 ├── tests/
-│   └── functions.test.js       # Pages Functions용 node:test 유닛 테스트
+│   ├── functions.test.js       # /api/hello용 node:test 유닛 테스트
+│   └── visits.test.js          # /api/visits용 KV 목 테스트
+├── wrangler.toml               # Pages 설정 + 주석 처리된 KV 바인딩 예시
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml              # 린트, 보안 스캔
@@ -215,6 +218,51 @@ npm test
 ```
 
 미들웨어, `[param]` 라우팅, `env` 바인딩 (KV, D1, R2) 등 자세한 내용은 [Cloudflare Pages Functions 문서](https://developers.cloudflare.com/pages/functions/)를 참고하세요.
+
+### Pages KV (상태 저장 예시)
+
+`functions/api/visits.js`는 [Cloudflare Workers KV](https://developers.cloudflare.com/kv/) 기반의 작은 방문 카운터입니다. `VISITS`로 바인딩된 KV 네임스페이스에서 `count`를 읽고, 1 증가시킨 뒤 JSON으로 돌려줍니다:
+
+```js
+export async function onRequest(context) {
+  const { env } = context;
+  const current = parseInt(await env.VISITS.get('count'), 10) || 0;
+  const next = current + 1;
+  await env.VISITS.put('count', String(next));
+  return new Response(JSON.stringify({ visits: next }), {
+    headers: { 'content-type': 'application/json' },
+  });
+}
+```
+
+**최초 설정 (한 번만)** — KV 네임스페이스를 만드세요 (로컬 개발용 preview 네임스페이스도 함께):
+
+```bash
+npx wrangler kv namespace create VISITS
+npx wrangler kv namespace create VISITS --preview
+```
+
+각 명령이 ID를 출력합니다. `wrangler.toml`을 열어 `[[kv_namespaces]]` 블록의 주석을 풀고 ID를 붙여넣으세요:
+
+```toml
+[[kv_namespaces]]
+binding = "VISITS"
+id = "<운영 네임스페이스 ID 붙여넣기>"
+preview_id = "<preview 네임스페이스 ID 붙여넣기>"
+```
+
+**로컬 개발** — `wrangler pages dev`는 기본적으로 로컬 KV 시뮬레이터를 쓰므로 운영 데이터를 건드리지 않습니다:
+
+```bash
+npm run dev
+# http://localhost:3000 열기 → 새로고침할 때마다 /api/visits 카운터가 증가.
+```
+
+네임스페이스를 만들기 전까지는 `/api/visits`가 `503`을 반환하고 페이지의 카운터 엘리먼트가 숨겨집니다 — `wrangler pages dev` 자체는 정상 기동합니다.
+
+**배포** — `wrangler.toml`에 ID만 넣으면 기존 CD 워크플로우가 바인딩도 함께 배포합니다 (추가 시크릿 불필요).
+
+전체 API는 [KV bindings](https://developers.cloudflare.com/kv/concepts/kv-bindings/)와 [Wrangler KV 명령어](https://developers.cloudflare.com/kv/reference/kv-commands/) 문서를 참고하세요.
 
 ## 왜 Cloudflare Pages?
 
