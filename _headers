@@ -1,0 +1,21 @@
+# Default security headers applied to every static response.
+# Cloudflare Pages serves this file natively — no Pages Function needed.
+# Docs: https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  # Defense in depth: HSTS, framing, sniffing, referrer leakage.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  # CSP — allows same-origin scripts/styles/images and https: connect targets.
+  # Tighten further (drop `'unsafe-inline'`, add nonces) before shipping a
+  # production app that can guarantee no inline scripts.
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+
+# JSON API responses don't render in browsers, but spelling out the
+# defaults documents the intent and overrides any UA quirks.
+/api/*
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
