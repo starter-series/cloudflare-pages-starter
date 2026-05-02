@@ -5,7 +5,7 @@
 // is JSON-encoded so injection-via-reflection is moot, but the size cap
 // matters for cache behavior and abuse mitigation.
 
-const NAME_PATTERN = /^[\p{L}\p{N} _.\-]{1,40}$/u;
+const NAME_PATTERN = /^[\p{L}\p{N} _.-]{1,40}$/u;
 
 export async function onRequest(context) {
   const url = new URL(context.request.url);
