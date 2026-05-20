@@ -6,9 +6,7 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     groups:
-      # Group minor/patch updates together to reduce PR noise. Major bumps
-      # fall outside the group and arrive as individual PRs so risky upgrades
-      # are reviewed in isolation.
+      # Groups bundle minor/patch only; majors arrive as individual PRs.
       lint:
         patterns: ["eslint", "@eslint/*", "globals"]
         update-types: ["minor", "patch"]

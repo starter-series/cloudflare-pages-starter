@@ -21,10 +21,8 @@ const COUNTER_KEY = 'count';
 export async function onRequest(context) {
   const { env, request } = context;
 
-  // The visit counter mutates KV; reject non-GET so a misbehaving client
-  // can't drive a denial-of-service via /api/visits with unexpected verbs.
-  // (GET is overloaded as "increment + read" by convention — keep that
-  // explicit at the boundary.)
+  // GET is overloaded here as "increment + read" — reject other verbs so
+  // a misbehaving client can't drive KV writes via unexpected methods.
   if (request.method !== 'GET') {
     return new Response(null, {
       status: 405,

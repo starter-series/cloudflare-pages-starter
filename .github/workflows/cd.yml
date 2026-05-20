@@ -17,8 +17,7 @@ jobs:
     environment: cloudflare
     permissions:
       contents: write
-      # SLSA build provenance: short-lived Sigstore signing cert + write to
-      # GH attestations API. Required by actions/attest-build-provenance.
+      # Required by actions/attest-build-provenance (Sigstore + GH attestations API).
       id-token: write
       attestations: write
     steps:
