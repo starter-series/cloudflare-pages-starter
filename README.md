@@ -40,6 +40,36 @@ cd my-site && npm install && npm run dev
 
 > ⚠️ **Before deploying: rename `package.json` `name`** (from `"my-site"` to your Cloudflare Pages project name) and update `repository.url` (replace `YOUR_USERNAME/YOUR_SITE`). The `deploy` script uses `$npm_package_name` as the Cloudflare Pages project name — **CD will silently deploy to the wrong project (or fail) if you skip this.** (create-starter handles the `name` automatically; you still need to set `repository.url`.)
 
+## Project Scope
+
+**Currently implemented**
+- Static site + Cloudflare Pages deploy via Wrangler (`src/` → `*.pages.dev`).
+- Pages Functions example (`functions/api/hello.js`) with `node:test` unit tests.
+- KV-backed counter (`functions/api/visits.js`) with atomic-read contract + NaN recovery.
+- CI: gitleaks secret scan, ESLint v9, `npm ci --ignore-scripts`, large-file guard.
+- CD: manual deploy + tagged GitHub Release; version guard rejects duplicate tags.
+- Security headers — `_headers` ships CSP / HSTS / Permissions-Policy / X-Content-Type-Options, locked by a regression test.
+- Weekly CodeQL + maintenance health check + stale-bot.
+
+**Planned**
+- None on the public roadmap. This template is intentionally feature-frozen; downstream projects add framework, auth, and data layers themselves.
+
+**Design intent**
+- Framework-free by default — `src/` is plain HTML/CSS/JS so adopting Vite, Astro, or React is a single command, not a migration.
+- `--ignore-scripts` everywhere (CI + local `npm install`) — prevents transitive postinstall hooks from running supply-chain payloads.
+- KV example uses `parseInt(…, 10) || 0` to recover from corrupted/missing values rather than 500ing — the counter is a demo, not a system of record.
+- `_headers` regression test exists because security policy drift is the kind of change that silently lands inside an unrelated "small CSS fix."
+
+**Non-goals**
+- Server-side rendering or SSG build pipeline. Use Astro / Next / Vite if you need them.
+- Edge SQL / D1 wiring. KV is the simplest stateful primitive to demo; D1 belongs in a feature repo, not a template.
+- Custom CD beyond Cloudflare Pages. The CD workflow is single-target by design.
+
+**Redacted**
+- Cloudflare account IDs and API tokens — placeholders only; populate via GitHub Secrets per [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md).
+
+> **Part of: Human-Controlled AI Systems** — safe-by-default deploy template for AI-assisted projects.
+
 ## What's Included
 
 ```
@@ -74,7 +104,8 @@ cd my-site && npm install && npm run dev
 
 - **Cloudflare Pages** — Global CDN, unlimited bandwidth, free
 - **Wrangler CLI** — Deploy via CI or locally with `npm run deploy`
-- **CI Pipeline** — Secret scanning, large file check, lint on every push and PR
+- **CI Pipeline** — Secret scan, large-file check, lint, `npm ci --ignore-scripts` supply-chain guard
+- **Security headers** — `_headers` ships CSP / HSTS / Permissions-Policy / X-Content-Type-Options, locked by a regression test
 - **CD Pipeline** — One-click deploy to Cloudflare Pages + auto GitHub Release
 - **Version management** — `npm run version:patch/minor/major`
 - **Local dev** — `npm run dev` with Cloudflare Pages emulation
