@@ -8,6 +8,16 @@
 const NAME_PATTERN = /^[\p{L}\p{N} _.-]{1,40}$/u;
 
 export async function onRequest(context) {
+  // This endpoint is read-only by design. Be explicit so a stray POST/PUT
+  // can't accidentally trigger code paths added later, and so monitoring
+  // can distinguish "wrong method" from "wrong payload."
+  if (context.request.method !== 'GET') {
+    return new Response(null, {
+      status: 405,
+      headers: { Allow: 'GET' },
+    });
+  }
+
   const url = new URL(context.request.url);
   const raw = url.searchParams.get('name');
 

@@ -17,6 +17,10 @@ jobs:
     environment: cloudflare
     permissions:
       contents: write
+      # SLSA build provenance: short-lived Sigstore signing cert + write to
+      # GH attestations API. Required by actions/attest-build-provenance.
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -38,7 +42,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
       - name: Install dependencies
@@ -50,6 +54,14 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           PROJECT_NAME: ${{ vars.PROJECT_NAME || 'my-site' }}
+
+      # SLSA Level 2 build provenance for the deployed bundle. Cloudflare
+      # Pages does not yet verify attestations server-side, but downstream
+      # consumers can: `gh attestation verify <file> --owner <org>`.
+      - name: Attest build provenance for deployed bundle
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'src/**/*'
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3

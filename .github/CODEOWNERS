@@ -1,0 +1,23 @@
+# Code owners auto-request review on PRs touching the listed paths.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+#
+# The paths below are the security-critical surface of this starter:
+# anything that drifts here is the kind of "small fix" that quietly weakens
+# the deployed bundle. CODEOWNERS guarantees the right eye lands on the diff.
+
+# Default catch-all
+*                                @heznpc
+
+# Security headers + their regression test
+/_headers                        @heznpc
+/tests/headers.test.js           @heznpc
+
+# Pages Functions (request handlers, input validation, KV contract)
+/functions/                      @heznpc
+
+# CI / CD / supply-chain workflows
+/.github/workflows/              @heznpc
+/.github/dependabot.yml          @heznpc
+
+# Documentation that downstream forks rely on for setup correctness
+/docs/                           @heznpc

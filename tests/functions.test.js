@@ -46,3 +46,11 @@ test('GET /api/hello accepts unicode names', async () => {
   const body = await response.json();
   assert.deepEqual(body, { greeting: 'Hello, レン!' });
 });
+
+test('POST /api/hello returns 405 with Allow: GET', async () => {
+  const response = await onRequest({
+    request: new Request('https://example.com/api/hello', { method: 'POST' }),
+  });
+  assert.equal(response.status, 405);
+  assert.equal(response.headers.get('Allow'), 'GET');
+});

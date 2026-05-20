@@ -19,7 +19,18 @@
 const COUNTER_KEY = 'count';
 
 export async function onRequest(context) {
-  const { env } = context;
+  const { env, request } = context;
+
+  // The visit counter mutates KV; reject non-GET so a misbehaving client
+  // can't drive a denial-of-service via /api/visits with unexpected verbs.
+  // (GET is overloaded as "increment + read" by convention — keep that
+  // explicit at the boundary.)
+  if (request.method !== 'GET') {
+    return new Response(null, {
+      status: 405,
+      headers: { Allow: 'GET' },
+    });
+  }
 
   if (!env || !env.VISITS) {
     return jsonResponse({ error: 'KV binding "VISITS" not configured' }, 503);
