@@ -40,6 +40,36 @@ cd my-site && npm install && npm run dev
 
 > ⚠️ **배포 전 필수: `package.json`의 `name`을 바꾸세요** (`"my-site"` → 실제 Cloudflare Pages 프로젝트 이름), 그리고 `repository.url`의 `YOUR_USERNAME/YOUR_SITE`도 교체하세요. `deploy` 스크립트가 `$npm_package_name`을 Cloudflare Pages 프로젝트 이름으로 사용합니다 — **건너뛰면 CD가 엉뚱한 프로젝트에 배포하거나 실패합니다.** (create-starter는 `name`을 자동으로 설정합니다. `repository.url`은 수동 설정이 필요합니다.)
 
+## 프로젝트 범위
+
+**Currently implemented (현재 구현됨)**
+- Wrangler 기반 정적 사이트 + Cloudflare Pages 배포 (`src/` → `*.pages.dev`).
+- Pages Functions 예시 (`functions/api/hello.js`) + `node:test` 유닛 테스트.
+- KV 기반 카운터 (`functions/api/visits.js`) — atomic-read 계약 + NaN 복구.
+- CI: gitleaks 시크릿 스캔, ESLint v9, `npm ci --ignore-scripts`, 대용량 파일 가드.
+- CD: 수동 배포 + 태그된 GitHub Release; version guard로 중복 태그 차단.
+- 보안 헤더 — `_headers` 가 CSP / HSTS / Permissions-Policy / X-Content-Type-Options 를 제공하며 회귀 테스트로 잠겨 있음.
+- 주간 CodeQL + maintenance health check + stale-bot.
+
+**Planned (로드맵)**
+- 공개 로드맵상 추가 기능 없음. 의도적으로 feature-frozen 템플릿이며, 프레임워크·인증·데이터 레이어는 downstream 프로젝트에서 직접 도입.
+
+**Design intent (설계 의도)**
+- 기본 프레임워크 없음 — `src/`는 plain HTML/CSS/JS 이므로 Vite·Astro·React 도입이 마이그레이션이 아니라 한 줄 명령으로 끝남.
+- `--ignore-scripts` 전면 적용 (CI + 로컬 `npm install`) — transitive dep 의 postinstall hook 으로 흘러드는 공급망 페이로드를 사전에 차단.
+- KV 예시는 `parseInt(…, 10) || 0` 로 손상/누락값을 복구 — 카운터는 데모이며 system of record 가 아님.
+- `_headers` 회귀 테스트는 "사소한 CSS 수정" 안에 묻혀 보안 정책이 drift 하는 패턴을 막기 위해 존재.
+
+**Non-goals (의도적 제외)**
+- SSR / SSG 빌드 파이프라인. 필요하다면 Astro / Next / Vite 를 직접 도입.
+- Edge SQL / D1 연결. KV 가 가장 단순한 stateful primitive 로 시연되며, D1 은 feature 레포의 몫.
+- Cloudflare Pages 외 커스텀 CD. CD 워크플로우는 단일 타겟이 의도된 설계.
+
+**Redacted (비공개)**
+- Cloudflare 계정 ID 및 API 토큰 — README 에는 placeholder 만; GitHub Secrets 로 주입 ([docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md) 참고).
+
+> **Part of: Human-Controlled AI Systems** — AI 보조 프로젝트를 위한 safe-by-default 배포 템플릿.
+
 ## 포함된 구성
 
 ```
@@ -74,7 +104,8 @@ cd my-site && npm install && npm run dev
 
 - **Cloudflare Pages** — 글로벌 CDN, 무제한 대역폭, 무료
 - **Wrangler CLI** — CI 또는 로컬에서 `npm run deploy`로 배포
-- **CI 파이프라인** — 모든 push와 PR에서 시크릿 스캔, 대용량 파일 체크, 린트
+- **CI 파이프라인** — 시크릿 스캔, 대용량 파일 체크, 린트, `npm ci --ignore-scripts` 공급망 가드
+- **보안 헤더** — `_headers` 가 CSP / HSTS / Permissions-Policy / X-Content-Type-Options 를 제공하며 회귀 테스트로 잠겨 있음
 - **CD 파이프라인** — 원클릭 Cloudflare Pages 배포 + GitHub Release 자동 생성
 - **버전 관리** — `npm run version:patch/minor/major`
 - **로컬 개발** — `npm run dev`로 Cloudflare Pages 에뮬레이션
