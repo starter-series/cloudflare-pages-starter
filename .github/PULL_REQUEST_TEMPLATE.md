@@ -9,6 +9,7 @@
 - [ ] Documentation
 - [ ] Refactoring
 - [ ] CI/CD
+- [ ] Security (CVE, header policy, supply-chain)
 
 ## Testing
 

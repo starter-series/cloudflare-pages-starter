@@ -41,6 +41,19 @@ test('CSP forbids frame-ancestors and remote scripts', () => {
   assert.doesNotMatch(headers, /'unsafe-eval'/);
 });
 
+test("CSP script-src never allows 'unsafe-inline'", () => {
+  // style-src 'unsafe-inline' is deliberately permitted for the demo;
+  // script-src 'unsafe-inline' is not. Pin the inverse so a careless
+  // CSP edit that adds it to scripts fails CI before deploy.
+  const cspMatch = headers.match(/Content-Security-Policy:[^\n]*/);
+  assert.ok(cspMatch, 'CSP header line should be present');
+  assert.doesNotMatch(
+    cspMatch[0],
+    /script-src[^;]*'unsafe-inline'/,
+    "script-src must not allow 'unsafe-inline'",
+  );
+});
+
 test('/api/* is marked Cache-Control: no-store', () => {
   assert.match(headers, /^\/api\/\*$/m);
   // The /api/* block must include no-store; we accept any whitespace.
