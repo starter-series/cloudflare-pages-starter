@@ -1,9 +1,5 @@
-# Code owners auto-request review on PRs touching the listed paths.
-# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
-#
-# The paths below are the security-critical surface of this starter:
-# anything that drifts here is the kind of "small fix" that quietly weakens
-# the deployed bundle. CODEOWNERS guarantees the right eye lands on the diff.
+# Auto-request review on PRs touching security-critical paths.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
 
 # Default catch-all
 *                                @heznpc
