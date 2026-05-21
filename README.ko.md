@@ -83,7 +83,9 @@ cd my-site && npm install && npm run dev
 │       └── visits.js           # KV 기반 방문 카운터 → GET /api/visits
 ├── tests/
 │   ├── functions.test.js       # /api/hello용 node:test 유닛 테스트
-│   └── visits.test.js          # /api/visits용 KV 목 테스트
+│   ├── visits.test.js          # /api/visits용 KV 목 테스트
+│   ├── headers.test.js         # _headers 회귀 가드 (CSP/HSTS/Permissions-Policy)
+│   └── bump-version.test.js    # version-bump 스크립트 동작 + pre-release 거부 검증
 ├── wrangler.toml               # Pages 설정 + 주석 처리된 KV 바인딩 예시
 ├── .github/
 │   ├── workflows/

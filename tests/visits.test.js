@@ -2,6 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { onRequest } from '../functions/api/visits.js';
 
+// TODO(2nd-pass-audit-2026-05-21): import COUNTER_KEY from ../functions/api/visits.js
+// instead of hardcoding 'count' here. Currently the test silently passes if the
+// implementation renames the key — drift waiting to happen.
 function makeMockKV(initial = null) {
   const store = new Map();
   if (initial !== null) store.set('count', initial);
