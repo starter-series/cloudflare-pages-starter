@@ -8,15 +8,22 @@ Static site with Cloudflare Pages deployment and GitHub Actions CI/CD.
 src/
   index.html    → Site entry point
   style.css     → Styles
-  main.js       → JavaScript (calls /api/hello demo)
+  main.js       → JavaScript (calls /api/hello + /api/visits demos)
 functions/
-  api/hello.js  → Example Pages Function
+  api/hello.js  → Example Pages Function (GET-only, 405 on other verbs)
+  api/visits.js → KV-backed visit counter (GET-only, eventual consistency)
+_headers        → CSP / HSTS / Permissions-Policy (Cloudflare native)
 tests/
-  functions.test.js → node:test units for Pages Functions
+  functions.test.js     → /api/hello unit tests
+  visits.test.js        → /api/visits unit tests with mock KV
+  headers.test.js       → _headers regression guard
+  bump-version.test.js  → bump-version.cjs behavior + pre-release refusal
 scripts/
-  bump-version.cjs → Version bumping
+  bump-version.cjs       → Version bumping (strict semver only)
+  check-placeholders.cjs → postinstall warning when name/repo placeholders remain
 docs/
   CLOUDFLARE_PAGES_SETUP.md → Deployment setup guide
+  BRANCH_PROTECTION.md      → Recommended main ruleset + gh api payload
 ```
 
 ## CI/CD Pipeline

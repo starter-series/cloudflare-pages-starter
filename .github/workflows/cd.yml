@@ -58,7 +58,7 @@ jobs:
       # Pages does not yet verify attestations server-side, but downstream
       # consumers can: `gh attestation verify <file> --owner <org>`.
       - name: Attest build provenance for deployed bundle
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'src/**/*'
 

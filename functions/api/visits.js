@@ -40,6 +40,9 @@ export async function onRequest(context) {
   // warning and surface the recovery via a header so Cloudflare logs and
   // monitoring can spot silent counter loss.
   const raw = await env.VISITS.get(COUNTER_KEY);
+  // TODO(2nd-pass-audit-2026-05-21): parseInt('123abc',10) → 123 silently
+  // accepts partial-numeric corruption. Tighten with /^-?\d+$/.test(raw)
+  // gate if KV ever holds anything other than counter integers.
   const current = parseInt(raw ?? '0', 10);
   const recovered = !Number.isFinite(current);
   if (recovered) {

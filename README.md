@@ -83,7 +83,9 @@ cd my-site && npm install && npm run dev
 │       └── visits.js           # KV-backed visit counter → GET /api/visits
 ├── tests/
 │   ├── functions.test.js       # node:test unit tests for /api/hello
-│   └── visits.test.js          # Unit tests for /api/visits with mock KV
+│   ├── visits.test.js          # Unit tests for /api/visits with mock KV
+│   ├── headers.test.js         # _headers regression guard (CSP/HSTS/Permissions-Policy)
+│   └── bump-version.test.js    # version-bump script behavior + pre-release refusal
 ├── wrangler.toml               # Pages config + commented KV binding example
 ├── .github/
 │   ├── workflows/
