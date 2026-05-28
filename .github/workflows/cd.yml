@@ -33,9 +33,20 @@ jobs:
           echo "Deploying v$VERSION"
 
       - name: Version guard
+        # Mirrors scripts/bump-version.cjs strict-semver gate. Without this,
+        # a hand-edited package.json with "1.2.3-alpha" or "01.02.03" would
+        # bypass the bump-script protection and publish a malformed git tag
+        # + GitHub Release. VERSION is injected via env: rather than expanded
+        # into the run-script body to avoid workflow injection patterns.
+        env:
+          VERSION: ${{ steps.pkg.outputs.version }}
         run: |
-          if git rev-parse "v${{ steps.pkg.outputs.version }}" >/dev/null 2>&1; then
-            echo "::error::Tag v${{ steps.pkg.outputs.version }} already exists. Bump the version first."
+          if ! printf '%s' "$VERSION" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'; then
+            echo "::error::Version \"$VERSION\" is not strict SemVer (M.m.p, no leading zeros, no pre-release / build metadata). Fix package.json before deploying."
+            exit 1
+          fi
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Tag v$VERSION already exists. Bump the version first."
             exit 1
           fi
 

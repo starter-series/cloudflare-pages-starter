@@ -76,7 +76,8 @@ cd my-site && npm install && npm run dev
 ├── src/
 │   ├── index.html              # Site entry point (replace with your site)
 │   ├── style.css               # Styles
-│   └── main.js                 # JavaScript
+│   ├── main.js                 # JavaScript
+│   └── _headers                # CSP / HSTS / Permissions-Policy (Cloudflare native)
 ├── functions/
 │   └── api/
 │       ├── hello.js            # Example Pages Function → GET /api/hello
@@ -94,9 +95,11 @@ cd my-site && npm install && npm run dev
 │   │   └── setup.yml           # Auto setup checklist on first use
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── docs/
-│   └── CLOUDFLARE_PAGES_SETUP.md  # Deployment setup guide
+│   ├── CLOUDFLARE_PAGES_SETUP.md  # Deployment setup guide
+│   └── BRANCH_PROTECTION.md       # Recommended main ruleset + gh api payload
 ├── scripts/
-│   └── bump-version.cjs        # Semver version bumper
+│   ├── bump-version.cjs           # Strict-semver version bumper
+│   └── check-placeholders.cjs     # postinstall placeholder warning
 ├── eslint.config.js            # ESLint v9 flat config
 ├── .gitignore
 └── package.json
