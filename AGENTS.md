@@ -12,7 +12,8 @@ src/
 functions/
   api/hello.js  → Example Pages Function (GET-only, 405 on other verbs)
   api/visits.js → KV-backed visit counter (GET-only, eventual consistency)
-_headers        → CSP / HSTS / Permissions-Policy (Cloudflare native)
+src/_headers    → CSP / HSTS / Permissions-Policy (lives inside the deploy dir
+                  so Cloudflare Pages serves it; tests read this same path)
 tests/
   functions.test.js     → /api/hello unit tests
   visits.test.js        → /api/visits unit tests with mock KV

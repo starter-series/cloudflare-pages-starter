@@ -40,10 +40,16 @@ export async function onRequest(context) {
   // warning and surface the recovery via a header so Cloudflare logs and
   // monitoring can spot silent counter loss.
   const raw = await env.VISITS.get(COUNTER_KEY);
-  // TODO(2nd-pass-audit-2026-05-21): parseInt('123abc',10) → 123 silently
-  // accepts partial-numeric corruption. Tighten with /^-?\d+$/.test(raw)
-  // gate if KV ever holds anything other than counter integers.
-  const current = parseInt(raw ?? '0', 10);
+  // Strict gate on the KV value: only `/^\d+$/` (unsigned integer string) is
+  // accepted. This rejects:
+  //   - parseInt('123abc',10) → 123 (partial-numeric corruption)
+  //   - parseInt('-5',10)     → -5  (negative; counter cannot decrease)
+  //   - parseInt('3.7',10)    → 3   (decimal noise)
+  //   - parseInt('',10) / parseInt('abc',10) → NaN
+  // null/undefined map to '0' (fresh counter). Anything else fires recovery.
+  const normalized = raw ?? '0';
+  const isClean = /^\d+$/.test(normalized);
+  const current = isClean ? parseInt(normalized, 10) : NaN;
   const recovered = !Number.isFinite(current);
   if (recovered) {
     console.warn(`VISITS counter corrupted, raw=${JSON.stringify(raw)} — resetting to 1`);

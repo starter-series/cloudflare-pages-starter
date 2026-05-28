@@ -14,16 +14,17 @@ const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
 const previous = pkg.version;
 
-// Strict semver: numeric major.minor.patch only. Pre-release / build-metadata
-// tags drop information when bumped (e.g. "1.2.3-alpha" + patch → ambiguous),
-// so refuse instead of writing a silently-broken version like "1.2.NaN".
-const STRICT_SEMVER = /^(\d+)\.(\d+)\.(\d+)$/;
-const m = STRICT_SEMVER.exec(previous);
+// Strict SemVer 2.0.0 §2: numeric major.minor.patch with NO leading zeros, NO
+// pre-release tag, NO build metadata. Tightening to `(0|[1-9]\d*)` (rather
+// than `\d+`) keeps the script consistent with cd.yml's Version guard —
+// otherwise `01.02.03` would silently re-write as `1.2.4`. Refuse instead.
+const STRICT_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const m = previous.match(STRICT_SEMVER);
 if (!m) {
   console.error(
-    `bump-version: refusing to bump non-numeric version "${previous}". ` +
-    `Expected major.minor.patch (e.g. 1.2.3). Strip any pre-release / build ` +
-    `metadata before bumping.`,
+    `bump-version: refusing to bump non-canonical version "${previous}". ` +
+    `Expected strict SemVer major.minor.patch (e.g. 1.2.3) with no leading ` +
+    `zeros, no pre-release tag, and no build metadata.`,
   );
   process.exit(1);
 }

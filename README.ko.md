@@ -76,7 +76,8 @@ cd my-site && npm install && npm run dev
 ├── src/
 │   ├── index.html              # 사이트 진입점 (직접 작성한 사이트로 교체)
 │   ├── style.css               # 스타일
-│   └── main.js                 # JavaScript
+│   ├── main.js                 # JavaScript
+│   └── _headers                # CSP / HSTS / Permissions-Policy (Cloudflare 네이티브)
 ├── functions/
 │   └── api/
 │       ├── hello.js            # Pages Function 예시 → GET /api/hello
@@ -94,9 +95,11 @@ cd my-site && npm install && npm run dev
 │   │   └── setup.yml           # 첫 사용 시 자동 설정 체크리스트
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── docs/
-│   └── CLOUDFLARE_PAGES_SETUP.md  # 배포 설정 가이드
+│   ├── CLOUDFLARE_PAGES_SETUP.md  # 배포 설정 가이드
+│   └── BRANCH_PROTECTION.md       # 권장 main 보호 정책 + gh api payload
 ├── scripts/
-│   └── bump-version.cjs        # Semver 버전 범퍼
+│   ├── bump-version.cjs           # 엄격 semver 버전 범퍼
+│   └── check-placeholders.cjs     # postinstall placeholder 경고
 ├── eslint.config.js            # ESLint v9 flat config
 ├── .gitignore
 └── package.json

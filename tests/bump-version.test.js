@@ -9,6 +9,9 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = resolve(HERE, '..', 'scripts', 'bump-version.cjs');
 
+// SYNC CALLBACKS ONLY. `rmSync` in `finally` runs before a Promise resolves,
+// so an async `fn` would have its tempdir deleted mid-await. Enforced at
+// runtime by rejecting Promise return values.
 function withTempPkg(version, fn) {
   const dir = mkdtempSync(join(tmpdir(), 'bump-version-'));
   try {
@@ -17,7 +20,14 @@ function withTempPkg(version, fn) {
     const scriptsDir = join(dir, 'scripts');
     cpSync(dirname(SCRIPT), scriptsDir, { recursive: true });
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 't', version }, null, 2) + '\n');
-    return fn(dir);
+    const result = fn(dir);
+    if (result && typeof result.then === 'function') {
+      throw new TypeError(
+        'withTempPkg callback must be synchronous; rmSync cleanup runs before ' +
+        'an async callback resolves, leaving the test reading a deleted path.',
+      );
+    }
+    return result;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -95,5 +105,14 @@ test('refuses unknown level argument', () => {
     assert.equal(r.code, 1);
     assert.match(r.stderr, /Usage/);
     assert.equal(versionOf(d), '1.2.3');
+  });
+});
+
+test('refuses leading-zero version (would silently renumber to 1.2.4)', () => {
+  withTempPkg('01.02.03', (d) => {
+    const r = run(d, 'patch');
+    assert.equal(r.code, 1);
+    assert.match(r.stderr, /non-canonical/);
+    assert.equal(versionOf(d), '01.02.03');
   });
 });

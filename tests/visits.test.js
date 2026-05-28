@@ -40,11 +40,34 @@ test('GET /api/visits increments existing count', async () => {
   assert.equal(kv.store.get('count'), '6');
 });
 
-test('GET /api/visits tolerates non-numeric KV value (treats as 0)', async () => {
+test('GET /api/visits tolerates non-numeric KV value (treats as corruption, recovers to 1)', async () => {
   const kv = makeMockKV('not-a-number');
   const response = await onRequest({ request: getReq(), env: { VISITS: kv } });
   const body = await response.json();
   assert.deepEqual(body, { visits: 1 });
+  assert.equal(response.headers.get('x-counter-recovered'), 'true');
+});
+
+test('GET /api/visits treats partial-numeric KV value as corruption (NOT 123)', async () => {
+  // Pre-fix bug: parseInt('123abc',10) returned 123 silently, so the
+  // response would say { visits: 124 } and no recovery header. After the
+  // /^\d+$/ gate the value is rejected and the counter resets to 1.
+  const kv = makeMockKV('123abc');
+  const response = await onRequest({ request: getReq(), env: { VISITS: kv } });
+  const body = await response.json();
+  assert.deepEqual(body, { visits: 1 });
+  assert.equal(response.headers.get('x-counter-recovered'), 'true');
+});
+
+test('GET /api/visits treats negative KV value as corruption (counter cannot decrease)', async () => {
+  // Pre-fix bug: parseInt('-5',10) returned -5; recovered was false because
+  // -5 is finite, so the response would be { visits: -4 }. After the gate
+  // the negative value triggers recovery.
+  const kv = makeMockKV('-5');
+  const response = await onRequest({ request: getReq(), env: { VISITS: kv } });
+  const body = await response.json();
+  assert.deepEqual(body, { visits: 1 });
+  assert.equal(response.headers.get('x-counter-recovered'), 'true');
 });
 
 test('GET /api/visits returns 503 when VISITS binding is missing', async () => {
