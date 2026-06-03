@@ -45,8 +45,8 @@ cd my-site && npm install && npm run dev
 **Currently implemented (현재 구현됨)**
 - Wrangler 기반 정적 사이트 + Cloudflare Pages 배포 (`src/` → `*.pages.dev`).
 - Pages Functions 예시 (`functions/api/hello.js`) + `node:test` 유닛 테스트.
-- KV 기반 카운터 (`functions/api/visits.js`) — atomic-read 계약 + NaN 복구.
-- CI: gitleaks 시크릿 스캔, ESLint v9, `npm ci --ignore-scripts`, 대용량 파일 가드.
+- KV 기반 카운터 (`functions/api/visits.js`) — best-effort 카운터 (KV는 eventually consistent — compare-and-swap 없음; 동시 트래픽에서 undercount 가능; 정확한 카운트가 필요하면 Durable Object 사용) + NaN 복구.
+- CI: gitleaks 시크릿 스캔, ESLint v10, `npm ci --ignore-scripts`, 대용량 파일 가드.
 - CD: 수동 배포 + 태그된 GitHub Release; version guard로 중복 태그 차단.
 - 보안 헤더 — `_headers` 가 CSP / HSTS / Permissions-Policy / X-Content-Type-Options 를 제공하며 회귀 테스트로 잠겨 있음.
 - 주간 CodeQL + maintenance health check + stale-bot.
@@ -100,7 +100,7 @@ cd my-site && npm install && npm run dev
 ├── scripts/
 │   ├── bump-version.cjs           # 엄격 semver 버전 범퍼
 │   └── check-placeholders.cjs     # postinstall placeholder 경고
-├── eslint.config.js            # ESLint v9 flat config
+├── eslint.config.js            # ESLint v10 flat config
 ├── .gitignore
 └── package.json
 ```
@@ -126,7 +126,7 @@ cd my-site && npm install && npm run dev
 | 시크릿 스캔 | gitleaks로 유출된 자격증명 감지 |
 | 대용량 파일 체크 | 5 MB 초과 파일 방지 (Cloudflare 제한: 25 MB) |
 | Install | `npm ci` lockfile 검증 |
-| 린트 | ESLint v9 flat config |
+| 린트 | ESLint v10 flat config |
 | 테스트 | `node --test`로 Pages Functions 유닛 테스트 실행 |
 
 ### 보안 & 유지보수
