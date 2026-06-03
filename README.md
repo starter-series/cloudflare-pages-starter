@@ -45,8 +45,8 @@ cd my-site && npm install && npm run dev
 **Currently implemented**
 - Static site + Cloudflare Pages deploy via Wrangler (`src/` → `*.pages.dev`).
 - Pages Functions example (`functions/api/hello.js`) with `node:test` unit tests.
-- KV-backed counter (`functions/api/visits.js`) with atomic-read contract + NaN recovery.
-- CI: gitleaks secret scan, ESLint v9, `npm ci --ignore-scripts`, large-file guard.
+- KV-backed counter (`functions/api/visits.js`) — best-effort counter (KV is eventually consistent — no compare-and-swap; may undercount under concurrent traffic; use a Durable Object for exact counts) + NaN recovery.
+- CI: gitleaks secret scan, ESLint v10, `npm ci --ignore-scripts`, large-file guard.
 - CD: manual deploy + tagged GitHub Release; version guard rejects duplicate tags.
 - Security headers — `_headers` ships CSP / HSTS / Permissions-Policy / X-Content-Type-Options, locked by a regression test.
 - Weekly CodeQL + maintenance health check + stale-bot.
@@ -100,7 +100,7 @@ cd my-site && npm install && npm run dev
 ├── scripts/
 │   ├── bump-version.cjs           # Strict-semver version bumper
 │   └── check-placeholders.cjs     # postinstall placeholder warning
-├── eslint.config.js            # ESLint v9 flat config
+├── eslint.config.js            # ESLint v10 flat config
 ├── .gitignore
 └── package.json
 ```
@@ -126,7 +126,7 @@ cd my-site && npm install && npm run dev
 | Secret scan | gitleaks scans for leaked credentials |
 | Large file check | Prevents files over 5 MB (Cloudflare limit: 25 MB) |
 | Install | `npm ci` with lockfile verification |
-| Lint | ESLint v9 flat config |
+| Lint | ESLint v10 flat config |
 | Test | `node --test` runs Pages Functions unit tests |
 
 ### Security & Maintenance
