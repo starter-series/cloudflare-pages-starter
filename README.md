@@ -57,7 +57,7 @@ cd my-site && npm install && npm run dev
 **Design intent**
 - Framework-free by default — `src/` is plain HTML/CSS/JS so adopting Vite, Astro, or React is a single command, not a migration.
 - `--ignore-scripts` everywhere (CI + local `npm install`) — prevents transitive postinstall hooks from running supply-chain payloads.
-- KV example uses `parseInt(…, 10) || 0` to recover from corrupted/missing values rather than 500ing — the counter is a demo, not a system of record.
+- KV example validates the stored value with a strict `/^\d+$/` gate (after trimming incidental whitespace), increments with `BigInt` so large counts never go through a lossy float, and degrades to `503` — never a raw `500` — when the binding is missing *or* a KV get/put throws. The counter is a demo, not a system of record.
 - `_headers` regression test exists because security policy drift is the kind of change that silently lands inside an unrelated "small CSS fix."
 
 **Non-goals**
@@ -265,6 +265,8 @@ export async function onRequest(context) {
   });
 }
 ```
+
+The snippet above is the *idea*; the shipped `functions/api/visits.js` hardens it: a strict `/^\d+$/` validation gate (with whitespace trimmed first, so `'50000\n'` is not mistaken for corruption), `BigInt` math so the count stays exact past `Number.MAX_SAFE_INTEGER`, a `503` (not `500`) when KV get/put throws, and an `X-Counter-Consistency: eventual` header advertising the lost-update contract. See the file and `tests/visits.test.js` for the full behaviour.
 
 **One-time setup** — create a KV namespace (plus a preview one for local dev):
 
