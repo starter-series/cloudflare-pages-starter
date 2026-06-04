@@ -57,7 +57,7 @@ cd my-site && npm install && npm run dev
 **Design intent (설계 의도)**
 - 기본 프레임워크 없음 — `src/`는 plain HTML/CSS/JS 이므로 Vite·Astro·React 도입이 마이그레이션이 아니라 한 줄 명령으로 끝남.
 - `--ignore-scripts` 전면 적용 (CI + 로컬 `npm install`) — transitive dep 의 postinstall hook 으로 흘러드는 공급망 페이로드를 사전에 차단.
-- KV 예시는 `parseInt(…, 10) || 0` 로 손상/누락값을 복구 — 카운터는 데모이며 system of record 가 아님.
+- KV 예시는 저장값을 strict `/^\d+$/` gate 로 검증하고(앞뒤 공백은 먼저 trim 하므로 `'50000\n'` 같은 값은 손상으로 오인하지 않음), `BigInt` 로 증가시켜 큰 카운트가 lossy float 를 거치지 않으며, 바인딩 부재 *또는* KV get/put 예외 시 raw `500` 이 아니라 `503` 으로 degrade — 카운터는 데모이며 system of record 가 아님.
 - `_headers` 회귀 테스트는 "사소한 CSS 수정" 안에 묻혀 보안 정책이 drift 하는 패턴을 막기 위해 존재.
 
 **Non-goals (의도적 제외)**
@@ -265,6 +265,8 @@ export async function onRequest(context) {
   });
 }
 ```
+
+위 스니펫은 *개념*이고, 실제 `functions/api/visits.js`는 더 단단하게 구현되어 있습니다: strict `/^\d+$/` 검증 gate(공백을 먼저 trim 하므로 `'50000\n'` 을 손상으로 오인하지 않음), `Number.MAX_SAFE_INTEGER` 를 넘어서도 정확한 `BigInt` 연산, KV get/put 예외 시 `500` 이 아닌 `503`, 그리고 lost-update 계약을 알리는 `X-Counter-Consistency: eventual` 헤더를 포함합니다. 전체 동작은 해당 파일과 `tests/visits.test.js` 를 참고하세요.
 
 **최초 설정 (한 번만)** — KV 네임스페이스를 만드세요 (로컬 개발용 preview 네임스페이스도 함께):
 
