@@ -40,7 +40,8 @@ jobs:
           Welcome! You've created a new project from **cloudflare-pages-starter**. Here's your setup checklist:
 
           ## ⚠️ CRITICAL — Do this FIRST
-          - [ ] **Rename `package.json` `name`** (currently `"my-site"`) — the `deploy` script uses `$npm_package_name` as the Cloudflare project name. **CD will fail or deploy to the wrong project if you skip this.**
+          - [ ] **Set GitHub Actions variable `PROJECT_NAME`** — this is the Cloudflare Pages project the CD workflow deploys to.
+          - [ ] **Rename `package.json` `name`** (currently `"my-site"`) if you plan to use local `npm run deploy`; that local script uses `$npm_package_name`.
           - [ ] **Update `repository.url`** in `package.json` — replace `YOUR_USERNAME/YOUR_SITE` with your actual repo path.
 
           ## Required
