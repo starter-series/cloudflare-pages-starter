@@ -50,7 +50,7 @@ Create an environment named `cloudflare`.
 
 ## 6. Deploy
 
-1. Update `package.json` — change `name` and the `--project-name` in the `deploy` script
+1. Set the GitHub Actions variable `PROJECT_NAME` to the Cloudflare Pages project name. For local `npm run deploy`, also rename `package.json` `name` to that same value.
 2. Commit and push to `main`
 3. Go to **Actions** tab → **Deploy to Cloudflare Pages** → **Run workflow**
 

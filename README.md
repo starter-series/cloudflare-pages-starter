@@ -38,7 +38,7 @@ git clone https://github.com/starter-series/cloudflare-pages-starter my-site
 cd my-site && npm install && npm run dev
 ```
 
-> ⚠️ **Before deploying: rename `package.json` `name`** (from `"my-site"` to your Cloudflare Pages project name) and update `repository.url` (replace `YOUR_USERNAME/YOUR_SITE`). The `deploy` script uses `$npm_package_name` as the Cloudflare Pages project name — **CD will silently deploy to the wrong project (or fail) if you skip this.** (create-starter handles the `name` automatically; you still need to set `repository.url`.)
+> ⚠️ **Before deploying:** set the GitHub Actions variable `PROJECT_NAME` to your Cloudflare Pages project name and update `repository.url` (replace `YOUR_USERNAME/YOUR_SITE`). For local `npm run deploy`, rename `package.json` `name` from `"my-site"` to the same project name because that script uses `$npm_package_name`. (create-starter handles the package name automatically; you still need to set `PROJECT_NAME` and `repository.url`.)
 
 ## Project Scope
 
