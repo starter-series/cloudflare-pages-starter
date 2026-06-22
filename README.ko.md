@@ -38,7 +38,9 @@ git clone https://github.com/starter-series/cloudflare-pages-starter my-site
 cd my-site && npm install && npm run dev
 ```
 
-> ⚠️ **배포 전 필수: `package.json`의 `name`을 바꾸세요** (`"my-site"` → 실제 Cloudflare Pages 프로젝트 이름), 그리고 `repository.url`의 `YOUR_USERNAME/YOUR_SITE`도 교체하세요. `deploy` 스크립트가 `$npm_package_name`을 Cloudflare Pages 프로젝트 이름으로 사용합니다 — **건너뛰면 CD가 엉뚱한 프로젝트에 배포하거나 실패합니다.** (create-starter는 `name`을 자동으로 설정합니다. `repository.url`은 수동 설정이 필요합니다.)
+> ⚠️ **배포 전 필수:** GitHub Actions 변수 `PROJECT_NAME`을 실제 Cloudflare Pages 프로젝트 이름으로 설정하고, `repository.url`의 `YOUR_USERNAME/YOUR_SITE`를 교체하세요. 로컬에서 `npm run deploy`를 사용할 경우 해당 스크립트가 `$npm_package_name`을 사용하므로 `package.json`의 `name`도 `"my-site"`에서 같은 프로젝트 이름으로 바꾸세요. (create-starter는 패키지 이름을 자동으로 설정합니다. `PROJECT_NAME`과 `repository.url`은 여전히 직접 설정해야 합니다.)
+>
+> 로컬 shell 배포용 값은 `.env.example`을 `.env`로 복사해 채우고, `.env`는 커밋하지 마세요.
 
 ## 프로젝트 범위
 
@@ -47,6 +49,7 @@ cd my-site && npm install && npm run dev
 - Pages Functions 예시 (`functions/api/hello.js`) + `node:test` 유닛 테스트.
 - KV 기반 카운터 (`functions/api/visits.js`) — best-effort 카운터 (KV는 eventually consistent — compare-and-swap 없음; 동시 트래픽에서 undercount 가능; 정확한 카운트가 필요하면 Durable Object 사용) + NaN 복구.
 - CI: gitleaks 시크릿 스캔, ESLint v10, `npm ci --ignore-scripts`, 대용량 파일 가드.
+- 빌드 계약: `npm run build`가 번들러 없이 정적 배포 경계(`src/`, `_headers`, Pages Functions, `wrangler.toml`, `package.json` deploy/files 설정)를 검증.
 - CD: 수동 배포 + 태그된 GitHub Release; version guard로 중복 태그 차단.
 - 보안 헤더 — `_headers` 가 CSP / HSTS / Permissions-Policy / X-Content-Type-Options 를 제공하며 회귀 테스트로 잠겨 있음.
 - 주간 CodeQL + maintenance health check + stale-bot.
@@ -88,9 +91,10 @@ cd my-site && npm install && npm run dev
 │   ├── headers.test.js         # _headers 회귀 가드 (CSP/HSTS/Permissions-Policy)
 │   └── bump-version.test.js    # version-bump 스크립트 동작 + pre-release 거부 검증
 ├── wrangler.toml               # Pages 설정 + 주석 처리된 KV 바인딩 예시
+├── .env.example                # 로컬 배포 env placeholder; untracked .env로 복사
 ├── .github/
 │   ├── workflows/
-│   │   ├── ci.yml              # 린트, 보안 스캔
+│   │   ├── ci.yml              # 시크릿 스캔, audit, 린트, 테스트, 빌드 계약
 │   │   ├── cd.yml              # Cloudflare Pages 배포
 │   │   └── setup.yml           # 첫 사용 시 자동 설정 체크리스트
 │   └── PULL_REQUEST_TEMPLATE.md
@@ -99,6 +103,7 @@ cd my-site && npm install && npm run dev
 │   └── BRANCH_PROTECTION.md       # 권장 main 보호 정책 + gh api payload
 ├── scripts/
 │   ├── bump-version.cjs           # 엄격 semver 버전 범퍼
+│   ├── check-build-output.cjs     # Cloudflare Pages 배포 계약 검증
 │   └── check-placeholders.cjs     # postinstall placeholder 경고
 ├── eslint.config.js            # ESLint v10 flat config
 ├── .gitignore
@@ -114,8 +119,9 @@ cd my-site && npm install && npm run dev
 - **CD 파이프라인** — 원클릭 Cloudflare Pages 배포 + GitHub Release 자동 생성
 - **버전 관리** — `npm run version:patch/minor/major`
 - **로컬 개발** — `npm run dev`로 Cloudflare Pages 에뮬레이션
+- **빌드 계약** — `npm run build`로 no-bundler 배포 표면 검증
 - **템플릿 셋업** — 첫 사용 시 설정 체크리스트 이슈 자동 생성
-- **최소 의존성** — devDependency 4개, 빌드 단계 불필요
+- **최소 의존성** — devDependency 4개, 번들러 불필요
 
 ## CI/CD
 
@@ -126,8 +132,10 @@ cd my-site && npm install && npm run dev
 | 시크릿 스캔 | gitleaks로 유출된 자격증명 감지 |
 | 대용량 파일 체크 | 5 MB 초과 파일 방지 (Cloudflare 제한: 25 MB) |
 | Install | `npm ci` lockfile 검증 |
+| Audit | `npm audit --audit-level=high`로 high severity 의존성 이슈 차단 |
 | 린트 | ESLint v10 flat config |
 | 테스트 | `node --test`로 Pages Functions 유닛 테스트 실행 |
+| 빌드 계약 | `npm run build`로 정적 Pages 배포 경계 검증 |
 
 ### 보안 & 유지보수
 
@@ -172,6 +180,7 @@ cd my-site && npm install && npm run dev
 4. GitHub Secrets에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 추가
 5. GitHub Environment `cloudflare` 생성
 6. GitHub 변수 `PROJECT_NAME`에 Cloudflare Pages 프로젝트 이름 설정
+7. 로컬 배포가 필요하면 `.env.example`을 `.env`로 복사해 로컬에서만 값을 채운 뒤 `set -a && . ./.env && set +a` 실행 후 `npm run deploy`
 
 끝. 자세한 가이드는 [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md)를 참고하세요.
 
@@ -201,6 +210,15 @@ npm run lint
 
 # 테스트 실행
 npm test
+
+# 정적 배포 계약 검증
+npm run build
+
+# high severity 의존성 이슈 audit
+npm audit --audit-level=high
+
+# 의도한 npm pack 경계 확인
+npm pack --dry-run --json
 
 # 수동 배포
 npm run deploy

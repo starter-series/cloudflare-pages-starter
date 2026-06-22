@@ -55,6 +55,7 @@ jobs:
           - [ ] Add GitHub Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
           - [ ] Create a GitHub Environment named `cloudflare` (Settings → Environments → New)
           - [ ] Set GitHub variable `PROJECT_NAME` to your Cloudflare Pages project name
+          - [ ] For local shell deploys only, copy `.env.example` to `.env` and fill it locally
 
           See [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md) for a detailed guide.
 

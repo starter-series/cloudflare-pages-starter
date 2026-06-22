@@ -14,4 +14,7 @@
 ## Testing
 
 - [ ] Linting passes (`npm run lint`)
+- [ ] Build contract passes (`npm run build`)
+- [ ] Tests pass (`npm test`)
+- [ ] High-severity audit passes (`npm audit --audit-level=high`)
 - [ ] Tested locally (`npm run dev`)

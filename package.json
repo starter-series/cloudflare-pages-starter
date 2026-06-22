@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler pages dev src --port 3000",
+    "build": "node scripts/check-build-output.cjs",
     "lint": "eslint --cache src/ functions/ tests/",
     "pretest": "node scripts/guard-tests-exist.cjs",
     "test": "node --test",
@@ -15,6 +16,23 @@
     "version:major": "node scripts/bump-version.cjs major",
     "postinstall": "node scripts/check-placeholders.cjs"
   },
+  "files": [
+    ".env.example",
+    ".gitattributes",
+    ".github/",
+    "AGENTS.md",
+    "LICENSE",
+    "README.md",
+    "README.ko.md",
+    "SECURITY.md",
+    "docs/",
+    "eslint.config.js",
+    "functions/",
+    "scripts/",
+    "src/",
+    "tests/",
+    "wrangler.toml"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/YOUR_USERNAME/YOUR_SITE.git"

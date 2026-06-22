@@ -51,10 +51,22 @@ Create an environment named `cloudflare`.
 ## 6. Deploy
 
 1. Set the GitHub Actions variable `PROJECT_NAME` to the Cloudflare Pages project name. For local `npm run deploy`, also rename `package.json` `name` to that same value.
-2. Commit and push to `main`
-3. Go to **Actions** tab → **Deploy to Cloudflare Pages** → **Run workflow**
+2. Run the local gates: `npm run lint`, `npm test`, `npm run build`, and `npm audit --audit-level=high`
+3. Commit and push to `main`
+4. Go to **Actions** tab → **Deploy to Cloudflare Pages** → **Run workflow**
 
 Your site will be live at `https://PROJECT_NAME.pages.dev`.
+
+### Optional local deploy environment
+
+For local shell deploys, copy `.env.example` to `.env`, fill the values on your
+machine, and keep `.env` untracked:
+
+```bash
+cp .env.example .env
+set -a && . ./.env && set +a
+npm run deploy
+```
 
 ## Custom Domain (Optional)
 
