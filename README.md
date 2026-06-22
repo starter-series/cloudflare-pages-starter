@@ -151,6 +151,7 @@ cd my-site && npm install && npm run dev
 |------|-------------|
 | CI | Runs full CI pipeline first |
 | Version guard | Fails if git tag already exists for this version |
+| Deploy preflight | Fails if `PROJECT_NAME`, `package.json` `name`, or `repository.url` still uses starter defaults |
 | Deploy | `wrangler pages deploy src` to Cloudflare Pages |
 | GitHub Release | Creates a tagged release with auto-generated notes |
 
@@ -213,6 +214,9 @@ npm test
 
 # Validate the static deploy contract
 npm run build
+
+# Fail deploy preflight if project metadata still uses starter defaults
+npm run deploy:preflight
 
 # Audit high-severity dependency issues
 npm audit --audit-level=high

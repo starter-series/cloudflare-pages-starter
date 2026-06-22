@@ -10,6 +10,8 @@
     "lint": "eslint --cache src/ functions/ tests/",
     "pretest": "node scripts/guard-tests-exist.cjs",
     "test": "node --test",
+    "deploy:preflight": "node scripts/deploy-preflight.cjs",
+    "predeploy": "npm run deploy:preflight",
     "deploy": "wrangler pages deploy src --project-name $npm_package_name",
     "version:patch": "node scripts/bump-version.cjs patch",
     "version:minor": "node scripts/bump-version.cjs minor",
