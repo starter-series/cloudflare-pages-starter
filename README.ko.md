@@ -151,6 +151,7 @@ cd my-site && npm install && npm run dev
 |------|------|
 | CI | 전체 CI 파이프라인 먼저 실행 |
 | 버전 가드 | 해당 버전의 git 태그가 이미 있으면 실패 |
+| 배포 preflight | `PROJECT_NAME`, `package.json` `name`, `repository.url`이 starter 기본값이면 실패 |
 | 배포 | `wrangler pages deploy src`로 Cloudflare Pages에 배포 |
 | GitHub Release | 자동 생성된 릴리즈 노트와 함께 태그 생성 |
 
@@ -213,6 +214,9 @@ npm test
 
 # 정적 배포 계약 검증
 npm run build
+
+# 프로젝트 metadata가 starter 기본값이면 배포 preflight 실패
+npm run deploy:preflight
 
 # high severity 의존성 이슈 audit
 npm audit --audit-level=high

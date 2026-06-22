@@ -48,6 +48,12 @@ if (failures.length === 0) {
   if (!/\bwrangler pages deploy src\b/.test(pkg.scripts?.deploy ?? '')) {
     fail('package.json deploy script must deploy src/');
   }
+  if (pkg.scripts?.predeploy !== 'npm run deploy:preflight') {
+    fail('package.json must run deploy:preflight before local deploy');
+  }
+  if (pkg.scripts?.['deploy:preflight'] !== 'node scripts/deploy-preflight.cjs') {
+    fail('package.json must expose deploy:preflight');
+  }
   if (!html.includes('href="style.css"')) {
     fail('src/index.html must reference style.css');
   }
