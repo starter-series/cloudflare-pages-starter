@@ -39,6 +39,8 @@ cd my-site && npm install && npm run dev
 ```
 
 > ⚠️ **Before deploying:** set the GitHub Actions variable `PROJECT_NAME` to your Cloudflare Pages project name and update `repository.url` (replace `YOUR_USERNAME/YOUR_SITE`). For local `npm run deploy`, rename `package.json` `name` from `"my-site"` to the same project name because that script uses `$npm_package_name`. (create-starter handles the package name automatically; you still need to set `PROJECT_NAME` and `repository.url`.)
+>
+> For local shell deploys, copy `.env.example` to `.env`, fill the values locally, and keep `.env` untracked.
 
 ## Project Scope
 
@@ -47,6 +49,7 @@ cd my-site && npm install && npm run dev
 - Pages Functions example (`functions/api/hello.js`) with `node:test` unit tests.
 - KV-backed counter (`functions/api/visits.js`) — best-effort counter (KV is eventually consistent — no compare-and-swap; may undercount under concurrent traffic; use a Durable Object for exact counts) + NaN recovery.
 - CI: gitleaks secret scan, ESLint v10, `npm ci --ignore-scripts`, large-file guard.
+- Build contract: `npm run build` verifies the static deploy boundary (`src/`, `_headers`, Pages Functions, `wrangler.toml`, and `package.json` deploy/files settings) without adding a bundler.
 - CD: manual deploy + tagged GitHub Release; version guard rejects duplicate tags.
 - Security headers — `_headers` ships CSP / HSTS / Permissions-Policy / X-Content-Type-Options, locked by a regression test.
 - Weekly CodeQL + maintenance health check + stale-bot.
@@ -88,9 +91,10 @@ cd my-site && npm install && npm run dev
 │   ├── headers.test.js         # _headers regression guard (CSP/HSTS/Permissions-Policy)
 │   └── bump-version.test.js    # version-bump script behavior + pre-release refusal
 ├── wrangler.toml               # Pages config + commented KV binding example
+├── .env.example                # Local deploy env placeholders; copy to untracked .env
 ├── .github/
 │   ├── workflows/
-│   │   ├── ci.yml              # Lint, security scan
+│   │   ├── ci.yml              # Secret scan, audit, lint, test, build contract
 │   │   ├── cd.yml              # Deploy to Cloudflare Pages
 │   │   └── setup.yml           # Auto setup checklist on first use
 │   └── PULL_REQUEST_TEMPLATE.md
@@ -99,6 +103,7 @@ cd my-site && npm install && npm run dev
 │   └── BRANCH_PROTECTION.md       # Recommended main ruleset + gh api payload
 ├── scripts/
 │   ├── bump-version.cjs           # Strict-semver version bumper
+│   ├── check-build-output.cjs     # Validates the Cloudflare Pages deploy contract
 │   └── check-placeholders.cjs     # postinstall placeholder warning
 ├── eslint.config.js            # ESLint v10 flat config
 ├── .gitignore
@@ -114,8 +119,9 @@ cd my-site && npm install && npm run dev
 - **CD Pipeline** — One-click deploy to Cloudflare Pages + auto GitHub Release
 - **Version management** — `npm run version:patch/minor/major`
 - **Local dev** — `npm run dev` with Cloudflare Pages emulation
+- **Build contract** — `npm run build` validates the no-bundler deploy surface
 - **Template setup** — Auto-creates setup checklist issue on first use
-- **Minimal** — 4 devDependencies, no build step required
+- **Minimal** — 4 devDependencies, no bundler required
 
 ## CI/CD
 
@@ -126,8 +132,10 @@ cd my-site && npm install && npm run dev
 | Secret scan | gitleaks scans for leaked credentials |
 | Large file check | Prevents files over 5 MB (Cloudflare limit: 25 MB) |
 | Install | `npm ci` with lockfile verification |
+| Audit | `npm audit --audit-level=high` blocks high-severity dependency issues |
 | Lint | ESLint v10 flat config |
 | Test | `node --test` runs Pages Functions unit tests |
+| Build contract | `npm run build` validates the static Pages deploy boundary |
 
 ### Security & Maintenance
 
@@ -172,6 +180,7 @@ See [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md) for the one
 4. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub Secrets
 5. Create a GitHub Environment named `cloudflare`
 6. Set `PROJECT_NAME` as a GitHub variable
+7. Optional for local deploys: copy `.env.example` to `.env`, fill it locally, then run `set -a && . ./.env && set +a` before `npm run deploy`
 
 That's it. See [docs/CLOUDFLARE_PAGES_SETUP.md](docs/CLOUDFLARE_PAGES_SETUP.md) for detailed steps.
 
@@ -201,6 +210,15 @@ npm run lint
 
 # Run tests
 npm test
+
+# Validate the static deploy contract
+npm run build
+
+# Audit high-severity dependency issues
+npm audit --audit-level=high
+
+# Inspect the intended npm pack boundary
+npm pack --dry-run --json
 
 # Deploy manually
 npm run deploy
