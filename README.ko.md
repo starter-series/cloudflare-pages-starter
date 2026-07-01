@@ -27,7 +27,7 @@
 **[create-starter](https://github.com/starter-series/create-starter) 사용** (추천):
 
 ```bash
-npx @starter-series/create my-site --template cloudflare-pages
+gh repo create my-site --template starter-series/cloudflare-pages-starter --clone
 cd my-site && npm install && npm run dev
 ```
 

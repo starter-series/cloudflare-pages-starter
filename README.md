@@ -27,7 +27,7 @@ Build your site. Push to deploy. Free and fast.
 **Via [create-starter](https://github.com/starter-series/create-starter)** (recommended):
 
 ```bash
-npx @starter-series/create my-site --template cloudflare-pages
+gh repo create my-site --template starter-series/cloudflare-pages-starter --clone
 cd my-site && npm install && npm run dev
 ```
 
