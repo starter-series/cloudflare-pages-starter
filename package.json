@@ -49,7 +49,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.8.1",
-    "globals": "^17.9.0",
+    "globals": "^17.11.0",
     "wrangler": "^4.120.0"
   },
   "//overrides": "wrangler@4.x → miniflare → ws@8.18.0 is affected by GHSA-58qx-3vcg-4xpx (uninitialized memory disclosure, <8.20.1). The override pins the transitive dep until miniflare ships the bump upstream. Dev-only impact (wrangler is devDependency).",
